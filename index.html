@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Himalayan Kitchen - Order System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .loading-screen {
+            max-width: 400px;
+            margin: 200px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .loading-screen h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tabs {
+            max-width: 1200px;
+            margin: 0 auto 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .menu-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+
+        .menu-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .menu-item.selected {
+            background: #667eea;
+            color: white;
+            border-color: #5568d3;
+        }
+
+        .menu-item-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .menu-item-price {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .spice-selector {
+            margin-top: 16px;
+            padding: 12px;
+            background: #fff3cd;
+            border-radius: 8px;
+            border: 2px solid #ffc107;
+        }
+
+        .spice-selector label {
+            color: #856404;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .spice-levels {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .spice-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ffc107;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: #856404;
+        }
+
+        .spice-btn:hover {
+            background: #fff3cd;
+        }
+
+        .spice-btn.active {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .order-items {
+            margin-bottom: 20px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .order-item-details {
+            flex: 1;
+        }
+
+        .order-item-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .order-item-spice {
+            font-size: 11px;
+            color: #dc3545;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .order-item-notes {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .order-item-price {
+            font-weight: 600;
+            color: #667eea;
+            margin-right: 12px;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 12px;
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #667eea;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .qty-btn:hover {
+            background: #5568d3;
+        }
+
+        .qty-display {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .remove-btn:hover {
+            background: #c82333;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .total {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            text-align: right;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .kitchen-order {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-left: 6px solid #28a745;
+        }
+
+        .kitchen-order.completed {
+            opacity: 0.6;
+            border-left-color: #6c757d;
+        }
+
+        .kitchen-order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .kitchen-table {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .kitchen-time {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .kitchen-order-number {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .kitchen-items {
+            margin-bottom: 16px;
+        }
+
+        .kitchen-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .kitchen-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .kitchen-item-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .kitchen-item-qty {
+            font-size: 16px;
+            font-weight: 700;
+            color: #667eea;
+            background: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+
+        .kitchen-item-spice {
+            font-size: 14px;
+            color: #dc3545;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .kitchen-item-notes {
+            font-size: 14px;
+            color: #dc3545;
+            font-weight: 500;
+            margin-top: 6px;
+            padding: 6px;
+            background: #fff5f5;
+            border-radius: 4px;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .connection-status.disconnected {
+            background: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <h2>Connecting to database...</h2>
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app" style="display: none;">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('waiter')">👨‍🍳 Waiter Station</button>
+            <button class="tab-btn" onclick="switchTab('kitchen')">🍳 Kitchen Display</button>
+        </div>
+
+        <!-- Waiter Tab -->
+        <div id="waiter-tab" class="tab-content active">
+            <div class="container">
+                <div class="panel">
+                    <h1>📋 Menu</h1>
+                    
+                    <div class="input-group">
+                        <label>Table Number</label>
+                        <input type="text" id="tableNumber" placeholder="Enter table number">
+                    </div>
+
+                    <h2>Starters & Soups</h2>
+                    <div class="menu-grid" id="starters"></div>
+
+                    <h2>Vegetarian Entrées</h2>
+                    <div class="menu-grid" id="vegetarian"></div>
+
+                    <h2>Non-Vegetarian Entrées</h2>
+                    <div class="menu-grid" id="nonvegetarian"></div>
+
+                    <h2>Beverages</h2>
+                    <div class="menu-grid" id="beverages"></div>
+
+                    <h2>Desserts</h2>
+                    <div class="menu-grid" id="desserts"></div>
+
+                    <h2>Sides</h2>
+                    <div class="menu-grid" id="sides"></div>
+
+                    <div class="spice-selector" id="spiceSelector" style="display: none;">
+                        <label>🌶️ Spice Level:</label>
+                        <div class="spice-levels">
+                            <button class="spice-btn" onclick="setSpiceLevel(1)">1</button>
+                            <button class="spice-btn" onclick="setSpiceLevel(2)">2</button>
+                            <button class="spice-btn" onclick="setSpiceLevel(3)">3</button>
+                            <button class="spice-btn" onclick="setSpiceLevel(4)">4</button>
+                            <button class="spice-btn" onclick="setSpiceLevel(5)">5</button>
+                        </div>
+                        <p style="font-size: 11px; margin-top: 8px; color: #856404;">1 = Mild, 5 = Extra Hot 🔥</p>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 16px;">
+                        <label>Special Instructions</label>
+                        <textarea id="specialInstructions" rows="3" placeholder="Any special requests or modifications..."></textarea>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="addSelectedItems()">Add to Order</button>
+                </div>
+
+                <div class="panel">
+                    <h1>🧾 Current Order</h1>
+                    
+                    <div id="orderInfo" style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-radius: 8px; display: none;">
+                        <div style="font-weight: 600; color: #333;">Table: <span id="displayTable">-</span></div>
+                        <div style="font-size: 12px; color: #666; margin-top: 4px;">Time: <span id="orderTime">-</span></div>
+                    </div>
+
+                    <div id="orderItems" class="order-items"></div>
+
+                    <div id="totalSection" style="display: none;">
+                        <div class="total">
+                            Total: $<span id="totalAmount">0.00</span>
+                        </div>
+
+                        <button class="btn btn-success" onclick="sendToKitchen()">🖨️ Send to Kitchen</button>
+                        <button class="btn btn-secondary" onclick="clearOrder()">Clear Order</button>
+                    </div>
+
+                    <div id="emptyState" class="empty-state">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🍽️</div>
+                        <div>No items added yet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kitchen Tab -->
+        <div id="kitchen-tab" class="tab-content">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <div class="panel">
+                    <h1>🍳 Kitchen Orders</h1>
+                    <div id="kitchenOrders"></div>
+                    <div id="noOrders" class="empty-state">
+                        <div style="font-size: 48px; margin-bottom: 10px;">👨‍🍳</div>
+                        <div>No orders yet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="connectionStatus" class="connection-status">● Connected</div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // ============================================
+        // 🔥 FIREBASE CONFIGURATION
+        // ============================================
+        // TODO: Replace these values with your Firebase project config
+        // Get these from: https://console.firebase.google.com
+        // → Your Project → Project Settings → Add Web App
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWngVZxGbds1jBpzkYl2EvEeqP5i2LqfU",
+            authDomain: "kitchenaid-ee625.firebaseapp.co",
+            databaseURL: "https://kitchenaid-ee625-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "kitchenaid-ee625",
+            storageBucket: "kitchenaid-ee625.firebasestorage.app",
+            messagingSenderId: "312063737636",
+            appId: "1:312063737636:web:4994e580bf48a09c5dfdb1"
+        };
+        
+        // ============================================
+        // End of Configuration - Don't edit below unless you know what you're doing!
+        // ============================================
+
+        const menu = {
+            starters: [
+                { id: 'ss1', name: 'SS1 Himalayan Ne-zom', price: 7.00 },
+                { id: 'ss2', name: 'SS2 Dhang-tsel', price: 7.00 },
+                { id: 'ss3', name: 'SS3 Thang (soup)', price: 6.00 },
+                { id: 'ss4', name: 'SS4 Daal', price: 6.00 },
+                { id: 'ss5', name: 'SS5 Thukpa Dhrangmo', price: 6.00 },
+                { id: 'ss6', name: 'SS6 Thukpa Dhrangmo w/ Beef', price: 8.00 },
+                { id: 'ss7', name: 'SS7 Thukpa Dhrangmo w/ Tofu', price: 8.00 },
+                { id: 'ss8', name: 'SS8 Peri-Peri Fries', price: 7.00 }
+            ],
+            vegetarian: [
+                { id: 'v1', name: 'V1 Tsel-Gyathuk Ngopa', price: 13.00 },
+                { id: 'v2', name: 'V2 Tsel-Shendey Ngopa', price: 13.00 },
+                { id: 'v3', name: 'V3 Shogo Ngopa', price: 13.00 },
+                { id: 'v4', name: 'V4 Tsel Momo', price: 12.50 },
+                { id: 'v5', name: 'V5 Shogo Moktak', price: 12.50 },
+                { id: 'v6', name: 'V6 Tsel Thenthuk/Thukpa', price: 13.00 },
+                { id: 'v7', name: 'V7 Shogo Tipsi', price: 13.00 },
+                { id: 'v8', name: 'V8 Tsel Curry/Nezom', price: 14.00 },
+                { id: 'v10', name: 'V10 Kewa Datshi', price: 15.00 },
+                { id: 'v11', name: 'V11 Tofu Phing (Veg)', price: 15.00 },
+                { id: 'v12', name: 'V12 Tsel Tofu', price: 14.00 },
+                { id: 'v13', name: 'V13 Sesha Tsel', price: 12.00 },
+                { id: 'v14', name: 'V14 Pe-tsel', price: 16.00 },
+                { id: 'v15', name: 'V15 Chili Tofu', price: 16.00 },
+                { id: 'v16', name: 'V16 Tofu Curry', price: 16.00 }
+            ],
+            nonvegetarian: [
+                { id: 'n1', name: 'N1 Gyathuk Ngopa', price: 13.00 },
+                { id: 'n2', name: 'N2 Shendey Ngopa', price: 13.15 },
+                { id: 'n3', name: 'N3 Thukpa/Keema Thukpa', price: 13.00 },
+                { id: 'n4', name: 'N4 Sha Momo', price: 12.50 },
+                { id: 'n5', name: 'N5 Sha Curry/Jha-Sha', price: 13.55 },
+                { id: 'n6', name: 'N6 Thenthuk', price: 13.00 },
+                { id: 'n8', name: 'N8 Sha-Khodhak', price: 17.00 },
+                { id: 'n9', name: 'N9 Shaptak/Shapink', price: 15.50 },
+                { id: 'n10', name: 'N10 Lab-Sha/Sha Tofu', price: 16.50 },
+                { id: 'n11', name: 'N11 Phing-sha', price: 14.50 },
+                { id: 'n12', name: 'N12 Phaksha Shaptak', price: 15.50 },
+                { id: 'n13', name: 'N13 Chili Shrimp', price: 17.00 },
+                { id: 'n14', name: 'N14 Chili Chicken', price: 17.00 },
+                { id: 'n15', name: 'N15 Shrimp Curry', price: 20.00 }
+            ],
+            beverages: [
+                { id: 'b1', name: 'B1 Chai Tea (Hot)', price: 4.00 },
+                { id: 'b1i', name: 'B1 Chai Tea (Iced)', price: 4.00 },
+                { id: 'b2', name: 'B2 Herbal Tea', price: 3.00 },
+                { id: 'b3', name: 'B3 Dhara (Mango Shake)', price: 5.00 },
+                { id: 'b9', name: 'B9 Ginger Lemon Honey Tea', price: 5.00 }
+            ],
+            desserts: [
+                { id: 'd1', name: 'D1 Kheer', price: 5.00 },
+                { id: 'd2', name: 'D2 Gulab Jamun', price: 4.00 }
+            ],
+            sides: [
+                { id: 's1', name: 'S1 Tingmo (Steamed Bun)', price: 3.00 },
+                { id: 's2', name: 'S2 Shendrey (Rice)', price: 2.00 },
+                { id: 's4', name: 'S4 Bhaklep (Flatbread)', price: 2.00 }
+            ]
+        };
+
+        let currentOrder = [];
+        let selectedItems = new Set();
+        let currentSpiceLevel = 3;
+        let db = null;
+        let ordersRef = null;
+
+        function initializeApp() {
+            try {
+                // Check if config is set
+                if (firebaseConfig.apiKey === "YOUR_API_KEY_HERE") {
+                    document.getElementById('loading-screen').innerHTML = `
+                        <h2 style="color: #dc3545;">⚠️ Firebase Not Configured</h2>
+                        <p style="color: #666; margin-top: 10px;">Please edit the HTML file and add your Firebase configuration.</p>
+                        <p style="color: #666; font-size: 12px; margin-top: 20px;">
+                            See FIREBASE_SETUP_GUIDE.md for instructions.
+                        </p>
+                    `;
+                    return;
+                }
+
+                // Initialize Firebase
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                db = firebase.database();
+                ordersRef = db.ref('orders');
+
+                // Hide loading, show app
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+
+                renderMenu();
+                listenToOrders();
+                updateConnectionStatus();
+            } catch (error) {
+                document.getElementById('loading-screen').innerHTML = `
+                    <h2 style="color: #dc3545;">Error</h2>
+                    <p style="color: #666; margin-top: 10px;">${error.message}</p>
+                    <p style="color: #666; font-size: 12px; margin-top: 20px;">
+                        Check your Firebase configuration.
+                    </p>
+                `;
+            }
+        }
+
+        function updateConnectionStatus() {
+            const connectedRef = db.ref('.info/connected');
+            connectedRef.on('value', (snapshot) => {
+                const status = document.getElementById('connectionStatus');
+                if (snapshot.val() === true) {
+                    status.textContent = '● Connected';
+                    status.classList.remove('disconnected');
+                } else {
+                    status.textContent = '● Disconnected';
+                    status.classList.add('disconnected');
+                }
+            });
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'waiter') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('waiter-tab').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('kitchen-tab').classList.add('active');
+            }
+        }
+
+        function renderMenu() {
+            for (const [category, items] of Object.entries(menu)) {
+                const container = document.getElementById(category);
+                if (container) {
+                    container.innerHTML = items.map(item => `
+                        <div class="menu-item" onclick="toggleItem('${item.id}')" id="menu-${item.id}">
+                            <div class="menu-item-name">${item.name}</div>
+                            <div class="menu-item-price">$${item.price.toFixed(2)}</div>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        function toggleItem(itemId) {
+            const element = document.getElementById(`menu-${itemId}`);
+            if (selectedItems.has(itemId)) {
+                selectedItems.delete(itemId);
+                element.classList.remove('selected');
+                if (selectedItems.size === 0) {
+                    document.getElementById('spiceSelector').style.display = 'none';
+                }
+            } else {
+                selectedItems.add(itemId);
+                element.classList.add('selected');
+                document.getElementById('spiceSelector').style.display = 'block';
+            }
+        }
+
+        function setSpiceLevel(level) {
+            currentSpiceLevel = level;
+            document.querySelectorAll('.spice-btn').forEach((btn, idx) => {
+                if (idx + 1 === level) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function findMenuItem(itemId) {
+            for (const items of Object.values(menu)) {
+                const item = items.find(i => i.id === itemId);
+                if (item) return item;
+            }
+            return null;
+        }
+
+        function addSelectedItems() {
+            if (selectedItems.size === 0) {
+                alert('Please select at least one item');
+                return;
+            }
+
+            const tableNumber = document.getElementById('tableNumber').value.trim();
+            if (!tableNumber) {
+                alert('Please enter a table number');
+                return;
+            }
+
+            const specialInstructions = document.getElementById('specialInstructions').value.trim();
+
+            selectedItems.forEach(itemId => {
+                const menuItem = findMenuItem(itemId);
+                if (menuItem) {
+                    currentOrder.push({
+                        ...menuItem,
+                        quantity: 1,
+                        spiceLevel: currentSpiceLevel,
+                        notes: specialInstructions
+                    });
+                }
+            });
+
+            selectedItems.forEach(itemId => {
+                document.getElementById(`menu-${itemId}`).classList.remove('selected');
+            });
+            selectedItems.clear();
+            document.getElementById('specialInstructions').value = '';
+            document.getElementById('spiceSelector').style.display = 'none';
+            currentSpiceLevel = 3;
+            document.querySelectorAll('.spice-btn').forEach(btn => btn.classList.remove('active'));
+
+            updateOrderDisplay();
+        }
+
+        function updateQuantity(index, change) {
+            currentOrder[index].quantity += change;
+            if (currentOrder[index].quantity <= 0) {
+                currentOrder.splice(index, 1);
+            }
+            updateOrderDisplay();
+        }
+
+        function removeItem(index) {
+            currentOrder.splice(index, 1);
+            updateOrderDisplay();
+        }
+
+        function updateOrderDisplay() {
+            const tableNumber = document.getElementById('tableNumber').value.trim();
+            const orderItemsEl = document.getElementById('orderItems');
+            const emptyStateEl = document.getElementById('emptyState');
+            const totalSectionEl = document.getElementById('totalSection');
+            const orderInfoEl = document.getElementById('orderInfo');
+
+            if (currentOrder.length === 0) {
+                orderItemsEl.innerHTML = '';
+                emptyStateEl.style.display = 'block';
+                totalSectionEl.style.display = 'none';
+                orderInfoEl.style.display = 'none';
+                return;
+            }
+
+            emptyStateEl.style.display = 'none';
+            totalSectionEl.style.display = 'block';
+            orderInfoEl.style.display = 'block';
+
+            document.getElementById('displayTable').textContent = tableNumber;
+            document.getElementById('orderTime').textContent = new Date().toLocaleString();
+
+            orderItemsEl.innerHTML = currentOrder.map((item, index) => `
+                <div class="order-item">
+                    <div class="order-item-details">
+                        <div class="order-item-name">${item.name}</div>
+                        <div class="order-item-spice">🌶️ Spice Level: ${item.spiceLevel}/5</div>
+                        ${item.notes ? `<div class="order-item-notes">Note: ${item.notes}</div>` : ''}
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="qty-btn" onclick="updateQuantity(${index}, -1)">−</button>
+                        <span class="qty-display">${item.quantity}</span>
+                        <button class="qty-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                    </div>
+                    <div class="order-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                    <button class="remove-btn" onclick="removeItem(${index})">×</button>
+                </div>
+            `).join('');
+
+            const total = currentOrder.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('totalAmount').textContent = total.toFixed(2);
+        }
+
+        function sendToKitchen() {
+            const tableNumber = document.getElementById('tableNumber').value.trim();
+            if (!tableNumber) {
+                alert('Please enter a table number');
+                return;
+            }
+            if (currentOrder.length === 0) {
+                alert('No items in order');
+                return;
+            }
+
+            const order = {
+                table: tableNumber,
+                items: currentOrder,
+                timestamp: Date.now(),
+                total: currentOrder.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                status: 'pending'
+            };
+
+            ordersRef.push(order).then(() => {
+                showNotification('Order sent to kitchen!');
+                currentOrder = [];
+                updateOrderDisplay();
+            }).catch(error => {
+                alert('Error sending order: ' + error.message);
+            });
+        }
+
+        function listenToOrders() {
+            ordersRef.orderByChild('timestamp').on('value', (snapshot) => {
+                const orders = [];
+                snapshot.forEach((childSnapshot) => {
+                    orders.push({
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+                orders.reverse();
+                renderKitchenOrders(orders);
+            });
+        }
+
+        function renderKitchenOrders(orders) {
+            const container = document.getElementById('kitchenOrders');
+            const noOrders = document.getElementById('noOrders');
+
+            if (orders.length === 0) {
+                container.innerHTML = '';
+                noOrders.style.display = 'block';
+                return;
+            }
+
+            noOrders.style.display = 'none';
+            let orderNumber = orders.length;
+            container.innerHTML = orders.map((order) => `
+                <div class="kitchen-order ${order.status === 'completed' ? 'completed' : ''}">
+                    <div class="kitchen-order-header">
+                        <div>
+                            <div class="kitchen-table">Table ${order.table}</div>
+                            <div class="kitchen-time">${new Date(order.timestamp).toLocaleString()}</div>
+                        </div>
+                        <div class="kitchen-order-number">Order #${orderNumber--}</div>
+                    </div>
+                    
+                    <div class="kitchen-items">
+                        ${order.items.map(item => `
+                            <div class="kitchen-item">
+                                <div class="kitchen-item-header">
+                                    <div class="kitchen-item-name">${item.name}</div>
+                                    <div class="kitchen-item-qty">× ${item.quantity}</div>
+                                </div>
+                                <div class="kitchen-item-spice">🌶️ Spice Level: ${item.spiceLevel}/5</div>
+                                ${item.notes ? `<div class="kitchen-item-notes">⚠️ ${item.notes}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="order-actions">
+                        ${order.status === 'pending' ? `
+                            <button class="btn btn-success" onclick="markComplete('${order.id}')">✓ Complete Order</button>
+                        ` : `
+                            <button class="btn btn-secondary" disabled>✓ Completed</button>
+                        `}
+                        <button class="btn btn-danger" onclick="deleteOrder('${order.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function markComplete(orderId) {
+            ordersRef.child(orderId).update({ status: 'completed' }).then(() => {
+                showNotification('Order marked as complete!');
+            });
+        }
+
+        function deleteOrder(orderId) {
+            if (confirm('Delete this order?')) {
+                ordersRef.child(orderId).remove().then(() => {
+                    showNotification('Order deleted');
+                });
+            }
+        }
+
+        function clearOrder() {
+            if (currentOrder.length === 0) return;
+            if (confirm('Clear all items from the order?')) {
+                currentOrder = [];
+                updateOrderDisplay();
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', initializeApp);
+    </script>
+</body>
+</html>
